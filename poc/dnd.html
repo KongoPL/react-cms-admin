@@ -1,0 +1,139 @@
+<div class="dropArea" id="area-1">
+    <div class="dropItem" draggable="true">Item #1</div>
+    <div class="dropItem" draggable="true">Item #2</div>
+    <div class="dropItem" draggable="true">Item #3</div>
+    <div class="dropItem" draggable="true">Item #4</div>
+    <div class="dropItem" draggable="true">Item #5</div>
+    <div class="dropItem" draggable="true">Item #6</div>
+</div>
+<div class="dropArea" id="area-2"></div>
+<div class="dropArea" id="area-3"></div>
+<script>
+class DragAndDrop
+{
+    constructor(items, areas) {
+        this.items = items;
+        this.areas = areas;
+
+        this.dragged = null;
+        this.dragCopy = null;
+
+        for(let item of items) {
+            this.setupItem(item);
+        }
+
+        for(let area of areas) {
+            this.setupArea(area);
+        }
+    }
+
+
+    setupItem(item)
+    {
+        item.addEventListener('dragstart', this.onItemDragStart.bind(this));
+    }
+
+
+    onItemDragStart(event)
+    {
+        this.dragged = event.target;
+    }
+
+
+    setupArea(area)
+    {
+        area.addEventListener("drop", this.onAreaDrop.bind(this, area), false);
+        area.addEventListener("dragover", this.onAreaDragOver.bind(this), false);
+        area.addEventListener("dragenter", this.onAreaDragEnter.bind(this));
+        area.addEventListener('dragleave', this.onAreaDragLeave.bind(this));
+    }
+
+
+    onAreaDrop(area, event)
+    {
+        // prevent default action (open as link for some elements)
+        event.preventDefault();
+
+        // move dragged elem to the selected drop target
+        if(this.dragCopy != null) {
+            this.dragCopy.remove();
+            this.dragCopy = null;
+        }
+
+        let target = event.target;
+
+        while(target.parentNode != null) {
+            if(target === area && this.dragged.parentNode !== target) {
+                this.dragged.parentNode.removeChild( this.dragged );
+                target.appendChild( this.dragged );
+
+                break;
+            }
+
+            target = target.parentNode;
+        }
+    }
+
+
+    onAreaDragOver(event)
+    {
+        // prevent default to allow drop
+        event.preventDefault();
+    }
+
+
+    onAreaDragEnter(event)
+    {
+        if(this.dragCopy != null) {
+            this.dragCopy.remove();
+        }
+
+        this.dragCopy = event.target.appendChild( this.dragged.cloneNode(true) );
+
+        this.dragCopy.style.opacity = 0;
+        this.dragCopy.classList.add('tmp');
+    }
+
+
+    onAreaDragLeave(event)
+    {
+        if(this.dragCopy != null) {
+            this.dragCopy.remove();
+            this.dragCopy = null;
+        }
+    }
+}
+
+let items = document.querySelectorAll('.dropItem'),
+    areas = document.querySelectorAll('.dropArea');
+
+const dnd = new DragAndDrop(items, areas);
+</script>
+<style type="text/css">
+    .dropArea
+    {
+        width: 200px;
+        min-height: 300px;
+        padding: 10px;
+
+        background: blue;
+
+        display: inline-block;
+        vertical-align: top;
+    }
+
+    .drop-items
+    {
+        width: 150px;
+    }
+
+    .dropItem
+    {
+        width: 100%;
+        height: 100px;
+
+        margin: 5px 0px;
+
+        background: red;
+    }
+</style>
