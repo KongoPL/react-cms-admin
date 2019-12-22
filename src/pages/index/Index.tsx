@@ -68,7 +68,7 @@ export default class Index extends React.Component
 	protected getItems(location: string)
 	{
 		return this.items.filter((v) => v.location == location)
-			.map((v) => <DraggableBox {...(v.props ?? {})}>{v.content}</DraggableBox>);
+			.map((v) => <DraggableBox {...(v.props || {})}>{v.content}</DraggableBox>);
 	}
 }
 
