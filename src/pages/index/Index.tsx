@@ -1,7 +1,43 @@
 import React from 'react';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 export default class Index extends React.Component
 {
+	static POS_HEADER = 'header';
+	static POS_LEFT = 'left';
+	static POS_RIGHT = 'right';
+
+	public items;
+
+	constructor(props) {
+		super(props);
+
+		this.items = [
+			{
+				location: Index.POS_HEADER,
+				content: 'Header'
+			}, {
+				location: Index.POS_LEFT,
+				content: 'Page content box',
+				props: {mb: 5}
+			}, {
+				location: Index.POS_LEFT,
+				content: 'Page content box',
+				props: {mb: 5}
+			}, {
+				location: Index.POS_LEFT,
+				content: 'Page content box',
+				props: {mb: 5}
+			}, {
+				location: Index.POS_RIGHT,
+				content: 'Right box #1'
+			}, {
+				location: Index.POS_RIGHT,
+				content: 'Right box #1'
+			}
+		] ;
+	}
+
 	render()
 	{
 		return <>
@@ -14,26 +50,30 @@ export default class Index extends React.Component
 			</header>
 			<div>
 				<div className="container mx-auto">
-					<DraggableBox location="top" index="9">Header</DraggableBox>
+					{this.getItems(Index.POS_HEADER)}
 					<div className="flex">
 						<DropContainer className="w-7/12 xl:mr-64">
-							<DraggableBox mb="5" location="left" index="0">Page content box</DraggableBox>
-							<DraggableBox mb="5" location="left" index="1">Page content box</DraggableBox>
-							<DraggableBox mb="5" location="left" index="2">Page content box</DraggableBox>
+							{this.getItems(Index.POS_LEFT)}
 						</DropContainer>
 						<DropContainer className="w-3/12">
-							<DraggableBox location="right" index="3">Right box #1</DraggableBox>
-							<DraggableBox location="right" index="4">Right box #2</DraggableBox>
+							{this.getItems(Index.POS_RIGHT)}
 						</DropContainer>
 					</div>
 				</div>
 			</div>
 		</>;
 	}
+
+
+	protected getItems(location: string)
+	{
+		return this.items.filter((v) => v.location == location)
+			.map((v) => <DraggableBox {...(v.props ?? {})}>{v.content}</DraggableBox>);
+	}
 }
 
 
-function DraggableBox({mb = '10', location, index, children})
+function DraggableBox({mb = '10', children})
 {
 	return <div className={`bg-gray-500 mb-${mb} h-20`}>{children}</div>
 }
