@@ -11,8 +11,8 @@ const App: React.FC = () =>
 	// </BrowserRouter>
 
 	return (
-		// <Index />
-		<Appka />
+		<Index />
+		// <Appka />
 	);
 }
 
