@@ -1,38 +1,137 @@
 import React, { Component } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
+export class Appka extends Component {
+    state = {
+        items: getItems(10),
+    };
+
+    render() {
+        return (
+            <DragDropContext onDragEnd={this.onDragEnd.bind(this)}>
+                <Droppable droppableId="items">
+                    {dropArea.bind(this, this.getItemsToRender('items'))}
+                </Droppable>
+                <Droppable droppableId="selected">
+                    {dropArea.bind(this, this.getItemsToRender('selected'))}
+                </Droppable>
+            </DragDropContext>
+        );
+    }
+
+    onDragEnd( result ) {
+        const { source, destination } = result;
+
+        // dropped outside the list
+        if (!destination) {
+            return;
+        }
+
+        let items = this.move(
+            this.state.items,
+            result.draggableId,
+            source,
+            destination
+        );
+
+        this.setState({ items });
+    };
+
+
+    /**
+     * Moves an item from one list to another list.
+     */
+    move(
+        list: any[],
+        itemId,
+        source: {droppableId: string, index: number},
+        destination: {droppableId: string, index: number}
+    ) {
+        let movementDirection = destination.droppableId  == source.droppableId ? Math.sign(source.index - destination.index) : 1;
+
+        // Move item to new list:
+        for(let listItem of list) {
+            if(listItem.location != destination.droppableId) {
+                continue;
+            }
+
+            if(listItem.index >= destination.index) {
+                listItem.index += movementDirection;
+            }
+        }
+
+        // Move item itself:
+        let item = list.find((v) => v.id === itemId);
+
+        item.index = destination.index;
+        item.location = destination.droppableId;
+
+
+        // Re-order old list:
+        let sourceListSorted = list.filter((v) => v.location === source.droppableId).sort((a,b) => a.index - b.index),
+            index = 0;
+
+        for(let listItem of sourceListSorted) {
+            listItem.index = index++;
+        }
+
+        return list;
+    }
+
+    private getItemsOfType(type)
+    {
+        return this.state.items.filter((v) => v.location === type).sort((a, b) => a.index - b.index);
+    }
+
+    private getItemsToRender(type)
+    {
+        return this.getItemsOfType(type).map((item, index) => (
+                <Draggable
+                    key={item.id}
+                    draggableId={item.id}
+                    index={index}>
+                    {(provided, snapshot) => (
+                        <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            style={getItemStyle(
+                                snapshot.isDragging,
+                                provided.draggableProps.style
+                            )}>
+                            {item.content}
+                        </div>
+                    )}
+                </Draggable>
+            ));
+    }
+}
+
+
+const dropArea = (items, provided, snapshot) =>
+    <div
+        ref={provided.innerRef}
+        style={getListStyle(snapshot.isDraggingOver)}>
+        {items}
+        {provided.placeholder}
+    </div>
+
+
 // fake data generator
-const getItems = (count, offset = 0) =>
-    Array.from({ length: count }, (v, k) => k).map(k => ({
-        id: `item-${k + offset}`,
-        content: `item ${k + offset}`
-    }));
+const getItems = (count) => {
+    let typeItems = {items: 0, selected: 0};
 
-// a little function to help us with reordering the result
-const reorder = (list, startIndex, endIndex) => {
-    const result = Array.from(list);
-    const [removed] = result.splice(startIndex, 1);
-    result.splice(endIndex, 0, removed);
+    return Array.from({length: count}, (v, k) => k).map(k => {
+        let type = Math.round(Math.random()) == 1 ? 'items' : 'selected';
 
-    return result;
-};
-
-/**
- * Moves an item from one list to another list.
- */
-const move = (source, destination, droppableSource, droppableDestination) => {
-    const sourceClone = Array.from(source);
-    const destClone = Array.from(destination);
-    const [removed] = sourceClone.splice(droppableSource.index, 1);
-
-    destClone.splice(droppableDestination.index, 0, removed);
-
-    const result = {};
-    result[droppableSource.droppableId] = sourceClone;
-    result[droppableDestination.droppableId] = destClone;
-
-    return result;
-};
+        return {
+            id: `item-${k}`,
+            content: `item ${k}`,
+            location: type,
+            index: typeItems[type]++
+        };
+    });
+}
 
 const grid = 8;
 
@@ -57,125 +156,3 @@ const getListStyle = isDraggingOver => ({
     verticalAlign: 'top',
     margin: 10
 });
-
-export class Appka extends Component {
-    state = {
-        items: getItems(10),
-        selected: getItems(5, 10)
-    };
-
-    /**
-     * A semi-generic way to handle multiple lists. Matches
-     * the IDs of the droppable container to the names of
-     * the
-     * source arrays stored in the state.
-     */
-    id2List = {
-        droppable: 'items',
-        droppable2: 'selected'
-    };
-
-    getList = id => this.state[this.id2List[id]];
-
-    onDragEnd = result => {
-        const { source, destination } = result;
-
-        // dropped outside the list
-        if (!destination) {
-            return;
-        }
-
-        if (source.droppableId === destination.droppableId) {
-            const items = reorder(
-                this.getList(source.droppableId),
-                source.index,
-                destination.index
-            );
-
-            let state: any = { items };
-
-            if (source.droppableId === 'droppable2') {
-                state = { selected: items };
-            }
-
-            this.setState(state);
-        } else {
-            const result: any = move(
-                this.getList(source.droppableId),
-                this.getList(destination.droppableId),
-                source,
-                destination
-            );
-
-            this.setState({
-                items: result.droppable,
-                selected: result.droppable2
-            });
-        }
-    };
-
-    // Normally you would want to split things out into separate components.
-    // But in this example everything is just done in one place for simplicity
-    render() {
-        return (
-            <DragDropContext onDragEnd={this.onDragEnd}>
-                <Droppable droppableId="droppable">
-                    {(provided, snapshot) => (
-                        <div
-                            ref={provided.innerRef}
-                            style={getListStyle(snapshot.isDraggingOver)}>
-                            {this.state.items.map((item, index) => (
-                                <Draggable
-                                    key={item.id}
-                                    draggableId={item.id}
-                                    index={index}>
-                                    {(provided, snapshot) => (
-                                        <div
-                                            ref={provided.innerRef}
-                                            {...provided.draggableProps}
-                                            {...provided.dragHandleProps}
-                                            style={getItemStyle(
-                                                snapshot.isDragging,
-                                                provided.draggableProps.style
-                                            )}>
-                                            {item.content}
-                                        </div>
-                                    )}
-                                </Draggable>
-                            ))}
-                            {provided.placeholder}
-                        </div>
-                    )}
-                </Droppable>
-                <Droppable droppableId="droppable2">
-                    {(provided, snapshot) => (
-                        <div
-                            ref={provided.innerRef}
-                            style={getListStyle(snapshot.isDraggingOver)}>
-                            {this.state.selected.map((item, index) => (
-                                <Draggable
-                                    key={item.id}
-                                    draggableId={item.id}
-                                    index={index}>
-                                    {(provided, snapshot) => (
-                                        <div
-                                            ref={provided.innerRef}
-                                            {...provided.draggableProps}
-                                            {...provided.dragHandleProps}
-                                            style={getItemStyle(
-                                                snapshot.isDragging,
-                                                provided.draggableProps.style
-                                            )}>
-                                            {item.content}
-                                        </div>
-                                    )}
-                                </Draggable>
-                            ))}
-                            {provided.placeholder}
-                        </div>
-                    )}
-                </Droppable>
-            </DragDropContext>
-        );
-    }
-}
