@@ -1,7 +1,7 @@
 import React from "react";
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import Api from "services/Api";
-import ComponentsList from "modules/ComponentsList";
+import ComponentsList from "shared/ComponentsList";
 
 export default class PageEditor extends React.Component<{}, {items: any[]}>
 {
