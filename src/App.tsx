@@ -1,7 +1,6 @@
 import React from 'react';
 //import { BrowserRouter, Route } from "react-router-dom";
 import Index from 'pages/index/Index';
-import {Appka} from "./test";
 
 const App: React.FC = () =>
 {
@@ -12,7 +11,6 @@ const App: React.FC = () =>
 
 	return (
 		<Index />
-		// <Appka />
 	);
 }
 
