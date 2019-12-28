@@ -2,6 +2,7 @@ import React from "react";
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import Api from "services/Api";
 import ComponentsList from "shared/ComponentsList";
+import Grid from "shared/Grid/Grid";
 
 export default class PageEditor extends React.Component<{}, {items: any[]}>
 {
@@ -98,28 +99,38 @@ export default class PageEditor extends React.Component<{}, {items: any[]}>
     
     render()
     {
+        let gridProps = {
+            gridStyle: {width: '960px', margin: '0px auto'},
+            gridSize: {width: 12, height: 2},
+            columnSizes: Array(12).fill('auto'),
+            rowSizes: Array(2).fill('auto'),
+            areas: [
+                {x: 0, y: 0, width: 12, height: 1, name: ItemPosition.HEADER},
+                {x: 0, y: 1, width: 7, height: 1, name: ItemPosition.LEFT},
+                {x: 9, y: 1, width: 3, height: 1, name: ItemPosition.RIGHT}
+            ],
+            gridChildren: {
+                [ItemPosition.HEADER]:
+                    <Droppable droppableId={ItemPosition.HEADER}>
+                        {this.dropArea.bind(this, this.getItemsToRender(ItemPosition.HEADER))}
+                    </Droppable>,
+
+                [ItemPosition.LEFT]:
+                    <Droppable droppableId={ItemPosition.LEFT}>
+                        {this.dropArea.bind(this, this.getItemsToRender(ItemPosition.LEFT))}
+                    </Droppable>,
+
+                [ItemPosition.RIGHT]:
+                    <Droppable droppableId={ItemPosition.RIGHT}>
+                        {this.dropArea.bind(this, this.getItemsToRender(ItemPosition.RIGHT))}
+                    </Droppable>,
+            }
+        };
+
         return <div className="page-editor">
-            <div className="container mx-auto">
-                <DragDropContext onDragEnd={this.onDragEnd.bind(this)}>
-                    <div className="w-12/12">
-                        <Droppable droppableId={ItemPosition.HEADER}>
-                            {this.dropArea.bind(this, this.getItemsToRender(ItemPosition.HEADER))}
-                        </Droppable>
-                    </div>
-                    <div className="flex">
-                        <div className="w-7/12 mr-64">
-                            <Droppable droppableId={ItemPosition.LEFT}>
-                                {this.dropArea.bind(this, this.getItemsToRender(ItemPosition.LEFT))}
-                            </Droppable>
-                        </div>
-                        <div className="w-3/12">
-                            <Droppable droppableId={ItemPosition.RIGHT}>
-                                {this.dropArea.bind(this, this.getItemsToRender(ItemPosition.RIGHT))}
-                            </Droppable>
-                        </div>
-                    </div>
-                </DragDropContext>
-            </div>
+            <DragDropContext onDragEnd={this.onDragEnd.bind(this)}>
+                <Grid {...gridProps} />
+            </DragDropContext>
         </div>;
     }
 
