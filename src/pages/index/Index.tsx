@@ -4,10 +4,11 @@ import {Modal, ModalFooter, ModalHeader} from "../../components/Modal";
 import {TextInput} from "../../components/Form";
 
 
-export default class Index extends React.Component<{}, {modalOpened: boolean}>
+export default class Index extends React.Component<{}, any>
 {
 	state = {
-		modalOpened: true
+		modalOpened: true,
+		headerPostfix: ''
 	};
 
 	render() {
@@ -24,10 +25,10 @@ export default class Index extends React.Component<{}, {modalOpened: boolean}>
 				</header>
 				<PageEditor/>
 				<Modal isOpened={this.state.modalOpened}>
-					<ModalHeader>It's some header</ModalHeader>
+					<ModalHeader>It's some header {this.state.headerPostfix}</ModalHeader>
 					<div>
 						<form>
-							<TextInput label="Some label" />
+							<TextInput label="Some label" onChange={(e) => this.setState({headerPostfix: e.target.value})} />
 						</form>
 						<p>Lorem ipsum dolor sit amet</p>
 					</div>

@@ -11,8 +11,6 @@ export default class PageEditor extends React.Component<{}, {items: any[]}>
 	constructor(props) {
 		super(props);
 
-		setTimeout(() => { debugger; },5000);
-
 		Api.deletePageEditorItems();
 
 		let items = Api.getPageEditorItems();
