@@ -1,14 +1,10 @@
 import React from 'react';
 import PageEditor from "../../components/PageEditor";
-import {Modal, ModalFooter, ModalHeader} from "../../components/Modal";
-import {TextInput} from "../../components/Form";
-
 
 export default class Index extends React.Component<{}, any>
 {
 	state = {
 		modalOpened: true,
-		headerPostfix: ''
 	};
 
 	render() {
@@ -24,28 +20,7 @@ export default class Index extends React.Component<{}, any>
 					</div>
 				</header>
 				<PageEditor/>
-				<Modal isOpened={this.state.modalOpened}>
-					<ModalHeader>It's some header {this.state.headerPostfix}</ModalHeader>
-					<div>
-						<form>
-							<TextInput label="Some label" onChange={(e) => this.setState({headerPostfix: e.target.value})} />
-						</form>
-						<p>Lorem ipsum dolor sit amet</p>
-					</div>
-					<ModalFooter>
-						<button onClick={() => this.openModal()}>Close</button>
-					</ModalFooter>
-				</Modal>
-
-				<button onClick={() => this.openModal()}>Open</button>
 			</>
 		);
-	}
-
-	private openModal()
-	{
-		this.setState({
-			modalOpened: !this.state.modalOpened
-		})
 	}
 }

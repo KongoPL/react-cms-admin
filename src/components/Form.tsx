@@ -1,4 +1,5 @@
 import React, {ChangeEvent} from 'react';
+import {Field, ErrorMessage} from 'formik';
 
 export class TextInput extends React.Component<IInputProps, any>
 {
@@ -21,7 +22,8 @@ class FormInput extends React.Component<IFormInputProps, any>
 
 		return <div>
 			{this.props.label && <label htmlFor={inputProps.id} className="block text-xs">{this.props.label}</label>}
-			<input {...inputProps} className="w-full pl-1 pr-1 border-b-2 border-blue-200 focus:border-blue-300" />
+			<Field {...inputProps} className="w-full pl-1 pr-1 border-b-2 border-blue-200 focus:border-blue-300" />
+			<ErrorMessage name={inputProps.name} render={msg => <span className="text-xs text-red-500">{msg}</span>} />
 		</div>;
 	}
 
@@ -34,6 +36,8 @@ class FormInput extends React.Component<IFormInputProps, any>
 
 interface IInputProps
 {
+	name: string
+
 	label?: string
 	id?: string
 	onChange?: (event: ChangeEvent<HTMLInputElement>) => void

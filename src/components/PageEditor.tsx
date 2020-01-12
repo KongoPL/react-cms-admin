@@ -3,11 +3,18 @@ import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import Api from "services/Api";
 import ComponentsList from "shared/ComponentsList";
 import Grid from "shared/Grid/Grid";
+import {Modal, ModalFooter, ModalHeader} from "./Modal";
+import {Form, Formik} from "formik";
+import {TextInput} from "./Form";
+import * as Yup from "yup";
 
 import 'scss/components/PageEditor.scss';
 
-export default class PageEditor extends React.Component<{}, {items: any[]}>
+
+export default class PageEditor extends React.Component<{}, {items: any[], headerPostfix: string, modalOpened: boolean}>
 {
+	private submitModalForm;
+
 	constructor(props) {
 		super(props);
 
@@ -91,7 +98,7 @@ export default class PageEditor extends React.Component<{}, {items: any[]}>
 			items = Api.getPageEditorItems();
 		}
 
-		this.state = { items };
+		this.state = { items, headerPostfix: '', modalOpened: false };
 	}
 
 	componentDidUpdate(prevProps: Readonly<{}>, prevState: Readonly<{ items: any[] }>, snapshot?: any): void {
@@ -129,12 +136,45 @@ export default class PageEditor extends React.Component<{}, {items: any[]}>
 			}
 		};
 
+		const formSchema = Yup.object().shape({
+			label: Yup.string()
+				.min(5, 'Minimum 5 characters long!')
+				.required('Required')
+		});
+
 		return <div className="page-editor">
 			<DragDropContext onDragEnd={this.onDragEnd.bind(this)}>
 				<Grid {...gridProps} />
 			</DragDropContext>
-			
+			<Modal isOpened={this.state.modalOpened}>
+				<ModalHeader>It's some header {this.state.headerPostfix}</ModalHeader>
+				<div>
+					<Formik
+						initialValues={{ label: 'test' }}
+						validationSchema={formSchema}
+						onSubmit={({label: headerPostfix }) => this.setState({headerPostfix})}
+						render={({handleSubmit}) => (
+							(this.submitModalForm = handleSubmit) && <Form>
+								<TextInput name="label" label="Some label" />
+							</Form>
+						)}
+					/>
+				</div>
+				<ModalFooter>
+					<button className="button-blue" onClick={() => this.submitModalForm()}>Save changes</button>
+					<button className="button" onClick={() => this.openModal()}>Close</button>
+				</ModalFooter>
+			</Modal>
+
+			<button onClick={() => this.openModal()}>Open</button>
 		</div>;
+	}
+
+	private openModal()
+	{
+		this.setState({
+			modalOpened: !this.state.modalOpened
+		})
 	}
 
 

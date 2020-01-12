@@ -24,5 +24,5 @@ export function ModalHeader(props)
 
 export function ModalFooter(props)
 {
-	return <footer className="border-t-2 border-gray-200 mt-2 text-right">{props.children}</footer>;
+	return <footer className="mt-2 pt-1 border-t-2 border-gray-200 text-right">{props.children}</footer>;
 }
