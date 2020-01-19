@@ -3,18 +3,13 @@ import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import Api from "services/Api";
 import ComponentsList from "shared/ComponentsList";
 import Grid from "shared/Grid/Grid";
-import {Modal, ModalFooter, ModalHeader} from "./Modal";
-import {Form, Formik} from "formik";
-import {TextInput} from "./Form";
-import * as Yup from "yup";
+import {ComponentEditModal} from "./ComponentEditModal";
 
 import 'scss/components/PageEditor.scss';
 
 
-export default class PageEditor extends React.Component<{}, {items: any[], headerPostfix: string, modalOpened: boolean}>
+export default class PageEditor extends React.Component<{}, {items: any[], headerPostfix: string, modalComponent: any | null, modalOpened: boolean}>
 {
-	private submitModalForm;
-
 	constructor(props) {
 		super(props);
 
@@ -98,7 +93,7 @@ export default class PageEditor extends React.Component<{}, {items: any[], heade
 			items = Api.getPageEditorItems();
 		}
 
-		this.state = { items, headerPostfix: '', modalOpened: false };
+		this.state = { items, headerPostfix: '', modalComponent: null, modalOpened: false };
 	}
 
 	componentDidUpdate(prevProps: Readonly<{}>, prevState: Readonly<{ items: any[] }>, snapshot?: any): void {
@@ -136,45 +131,16 @@ export default class PageEditor extends React.Component<{}, {items: any[], heade
 			}
 		};
 
-		const formSchema = Yup.object().shape({
-			label: Yup.string()
-				.min(5, 'Minimum 5 characters long!')
-				.required('Required')
-		});
-
 		return <div className="page-editor">
 			<DragDropContext onDragEnd={this.onDragEnd.bind(this)}>
 				<Grid {...gridProps} />
 			</DragDropContext>
-			<Modal isOpened={this.state.modalOpened}>
-				<ModalHeader>It's some header {this.state.headerPostfix}</ModalHeader>
-				<div>
-					<Formik
-						initialValues={{ label: 'test' }}
-						validationSchema={formSchema}
-						onSubmit={({label: headerPostfix }) => this.setState({headerPostfix})}
-						render={({handleSubmit}) => (
-							(this.submitModalForm = handleSubmit) && <Form>
-								<TextInput name="label" label="Some label" />
-							</Form>
-						)}
-					/>
-				</div>
-				<ModalFooter>
-					<button className="button-blue" onClick={() => this.submitModalForm()}>Save changes</button>
-					<button className="button" onClick={() => this.openModal()}>Close</button>
-				</ModalFooter>
-			</Modal>
-
-			<button onClick={() => this.openModal()}>Open</button>
+			<ComponentEditModal
+				isOpened={this.state.modalOpened}
+				component={this.state.modalComponent}
+				onModalClose={() => this.setState({modalOpened: false})}
+			/>
 		</div>;
-	}
-
-	private openModal()
-	{
-		this.setState({
-			modalOpened: !this.state.modalOpened
-		})
 	}
 
 
@@ -197,7 +163,9 @@ export default class PageEditor extends React.Component<{}, {items: any[], heade
 						ref={provided.innerRef}
 						{...provided.draggableProps}
 						{...provided.dragHandleProps}
-						style={provided.draggableProps.style}>
+						style={provided.draggableProps.style}
+						onClick={()=>this.setState({modalComponent: item.component, modalOpened: true})}
+					>
 						{this.renderComponent(item.component)}
 					</div>
 				)}
@@ -208,7 +176,8 @@ export default class PageEditor extends React.Component<{}, {items: any[], heade
 
 	private getItemsOfType(type)
 	{
-		return this.state.items.filter((v) => v.location === type).sort((a, b) => a.index - b.index);
+		return this.state.items.filter((v) => v.location === type)
+			.sort((a, b) => a.index - b.index);
 	}
 
 
