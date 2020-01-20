@@ -8,7 +8,7 @@ import {ComponentEditModal} from "./ComponentEditModal";
 import 'scss/components/PageEditor.scss';
 
 
-export default class PageEditor extends React.Component<{}, {items: any[], headerPostfix: string, modalComponent: any | null, modalOpened: boolean}>
+export default class PageEditor extends React.Component<{},  IPageEditorState>
 {
 	constructor(props) {
 		super(props);
@@ -255,9 +255,32 @@ export default class PageEditor extends React.Component<{}, {items: any[], heade
 	}
 }
 
+interface IPageEditorState
+{
+	items: IEditorItem[],
+	headerPostfix: string,
+	modalComponent: IEditorComponent | null,
+	modalOpened: boolean
+}
+
 enum ItemPosition
 {
 	HEADER = 'header',
 	LEFT = 'left',
 	RIGHT = 'right',
+}
+
+export interface IEditorItem
+{
+	id: string,
+	location: string,
+	index: number,
+
+	component: IEditorComponent
+}
+
+export interface IEditorComponent
+{
+	name: string
+	props: object
 }

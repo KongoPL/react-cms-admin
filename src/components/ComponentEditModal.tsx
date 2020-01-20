@@ -3,37 +3,67 @@ import {Modal, ModalFooter, ModalHeader} from "./Modal";
 import {Form, Formik} from "formik";
 import {TextInput} from "./Form";
 import * as Yup from "yup";
+import {IEditorComponent} from "./PageEditor";
+import ComponentsList from "../shared/ComponentsList";
+import BaseModule from "../shared/BaseModule/BaseModule";
 
 export class ComponentEditModal extends React.Component<IComponentEditModalProps>
 {
 	private submitModalForm;
+	private componentObject: BaseModule | any;
 
 	constructor(props)
 	{
 		super(props);
+
+		this.createComponentObject();
+	}
+
+	componentDidUpdate(prevProps: Readonly<IComponentEditModalProps>, prevState: Readonly<{}>, snapshot?: any): void
+	{
+		console.warn(":)");
+
+		this.createComponentObject();
+	}
+
+	private createComponentObject()
+	{
+		if(this.props.component === null)
+			return;
+
+		const className = ComponentsList[this.props.component.name];
+
+		this.componentObject = new className;
 	}
 
 	render()
 	{
+		if(this.props.component === null)
+			return <></>;
+
+		if(this.componentObject == undefined)
+		{
+			this.createComponentObject();
+		}
+
 		const formSchema = Yup.object().shape({
-			label: Yup.string()
-				.min(5, 'Minimum 5 characters long!')
-				.required('Required')
+			//label:
 		});
 
 		return <Modal isOpened={this.props.isOpened}>
 			<ModalHeader>It's some header</ModalHeader>
 			<div>
 				<Formik
-					initialValues={{ label: 'test' }}
+					initialValues={this.props.component.props}
 					validationSchema={formSchema}
-					onSubmit={({label: headerPostfix }) => this.setState({headerPostfix})}
-					render={({handleSubmit}) => (
+					onSubmit={(/*{label: headerPostfix }*/) => {}/*this.setState({headerPostfix})*/}
+				>
+					{({handleSubmit}) => (
 						(this.submitModalForm = handleSubmit) && <Form>
-							<TextInput name="label" label="Some label" />
+							{this.renderFormInputs()}
 						</Form>
 					)}
-				/>
+				</Formik>
 			</div>
 			<ModalFooter>
 				<button className="button-blue" onClick={() => this.submitModalForm()}>Save changes</button>
@@ -50,13 +80,26 @@ export class ComponentEditModal extends React.Component<IComponentEditModalProps
 			this.props[eventName]();
 		}
 	}
+
+
+	private renderFormInputs()
+	{
+		let inputs: any[] = [];
+
+		for(let property in this.componentObject.propsRules)
+		{
+			inputs.push(<TextInput name={property} label={property} />)
+		}
+
+		return inputs;
+	}
 }
 
 
 interface IComponentEditModalProps
 {
 	isOpened: boolean;
-	component: any | null
+	component: IEditorComponent | null
 
 	// Events:
 	onModalClose?: () => void;
