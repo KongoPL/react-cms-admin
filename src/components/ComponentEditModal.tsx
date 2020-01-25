@@ -10,21 +10,54 @@ import BaseModule from "../shared/BaseModule/BaseModule";
 export class ComponentEditModal extends React.Component<IComponentEditModalProps>
 {
 	private submitModalForm;
+	private setModalFieldValue;
+
 	private componentObject: BaseModule | any;
 
-	constructor(props)
+	componentDidUpdate(): void
 	{
-		super(props);
+		if(this.props.component === null)
+			return;
 
-		this.createComponentObject();
+		for(let propertyName in this.props.component.props)
+		{
+			const propertyValue = this.props.component.props[propertyName];
+
+			this.setModalFieldValue(propertyName, propertyValue);
+		}
 	}
 
-	componentDidUpdate(prevProps: Readonly<IComponentEditModalProps>, prevState: Readonly<{}>, snapshot?: any): void
+	render()
 	{
-		console.warn(":)");
+		if(this.props.component === null)
+			return <></>;
 
 		this.createComponentObject();
+
+
+
+		return <Modal isOpened={this.props.isOpened}>
+			<ModalHeader>It's some header</ModalHeader>
+			<div>
+				<Formik
+					initialValues={this.props.component.props}
+					validationSchema={this.getFormValidationSchema() }
+					onSubmit={(/*{label: headerPostfix }*/) => {}/*this.setState({headerPostfix})*/}
+				>
+					{({handleSubmit, setFieldValue}) => (
+						(this.submitModalForm = handleSubmit) && (this.setModalFieldValue = setFieldValue) && <Form>
+							{this.renderFormInputs()}
+						</Form>
+					)}
+				</Formik>
+			</div>
+			<ModalFooter>
+				<button className="button-blue" type="submit" onClick={() => this.submitModalForm()}>Save changes</button>
+				<button className="button" onClick={() => this.emitEvent('onModalClose')}>Close</button>
+			</ModalFooter>
+		</Modal>;
 	}
+
 
 	private createComponentObject()
 	{
@@ -36,49 +69,11 @@ export class ComponentEditModal extends React.Component<IComponentEditModalProps
 		this.componentObject = new className;
 	}
 
-	render()
-	{
-		if(this.props.component === null)
-			return <></>;
-
-		if(this.componentObject == undefined)
-		{
-			this.createComponentObject();
-		}
-
-		const formSchema = Yup.object().shape({
-			//label:
-		});
-
-		return <Modal isOpened={this.props.isOpened}>
-			<ModalHeader>It's some header</ModalHeader>
-			<div>
-				<Formik
-					initialValues={this.props.component.props}
-					validationSchema={formSchema}
-					onSubmit={(/*{label: headerPostfix }*/) => {}/*this.setState({headerPostfix})*/}
-				>
-					{({handleSubmit}) => (
-						(this.submitModalForm = handleSubmit) && <Form>
-							{this.renderFormInputs()}
-						</Form>
-					)}
-				</Formik>
-			</div>
-			<ModalFooter>
-				<button className="button-blue" onClick={() => this.submitModalForm()}>Save changes</button>
-				<button className="button" onClick={() => this.emitEvent('onModalClose')}>Close</button>
-			</ModalFooter>
-		</Modal>;
-	}
-
 
 	private emitEvent(eventName: string)
 	{
 		if(eventName in this.props && typeof this.props[eventName] === 'function')
-		{
 			this.props[eventName]();
-		}
 	}
 
 
@@ -87,11 +82,26 @@ export class ComponentEditModal extends React.Component<IComponentEditModalProps
 		let inputs: any[] = [];
 
 		for(let property in this.componentObject.propsRules)
-		{
-			inputs.push(<TextInput name={property} label={property} />)
-		}
+			inputs.push(<TextInput key={property} name={property} label={property} />);
 
 		return inputs;
+	}
+
+	private getFormValidationSchema()
+	{
+		const propsValidationRules = {};
+
+		for(let property in this.componentObject.propsRules)
+		{
+			const propRules = this.componentObject.propsRules[property];
+
+			if('validation' in propRules === false)
+				continue;
+
+			propsValidationRules[property] = propRules.validation;
+		}
+
+		return Yup.object().shape(propsValidationRules);
 	}
 }
 
