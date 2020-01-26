@@ -13,6 +13,17 @@ export class ComponentEditModal extends React.Component<IComponentEditModalProps
 	private setModalFieldValue;
 
 	private componentObject: BaseModule | any;
+	private onModalClose: () => void;
+
+	constructor(props)
+	{
+		super(props);
+
+		if(typeof this.props.onModalClose === 'function')
+			this.onModalClose = this.props.onModalClose;
+		else
+			this.onModalClose = () => {};
+	}
 
 	componentDidUpdate(): void
 	{
@@ -34,15 +45,13 @@ export class ComponentEditModal extends React.Component<IComponentEditModalProps
 
 		this.createComponentObject();
 
-
-
 		return <Modal isOpened={this.props.isOpened}>
 			<ModalHeader>It's some header</ModalHeader>
 			<div>
 				<Formik
 					initialValues={this.props.component.props}
 					validationSchema={this.getFormValidationSchema() }
-					onSubmit={(/*{label: headerPostfix }*/) => {}/*this.setState({headerPostfix})*/}
+					onSubmit={(props) => {this.updateProps(props); this.onModalClose(); }}
 				>
 					{({handleSubmit, setFieldValue}) => (
 						(this.submitModalForm = handleSubmit) && (this.setModalFieldValue = setFieldValue) && <Form>
@@ -53,7 +62,7 @@ export class ComponentEditModal extends React.Component<IComponentEditModalProps
 			</div>
 			<ModalFooter>
 				<button className="button-blue" type="submit" onClick={() => this.submitModalForm()}>Save changes</button>
-				<button className="button" onClick={() => this.emitEvent('onModalClose')}>Close</button>
+				<button className="button" onClick={this.onModalClose}>Close</button>
 			</ModalFooter>
 		</Modal>;
 	}
@@ -66,14 +75,7 @@ export class ComponentEditModal extends React.Component<IComponentEditModalProps
 
 		const className = ComponentsList[this.props.component.name];
 
-		this.componentObject = new className;
-	}
-
-
-	private emitEvent(eventName: string)
-	{
-		if(eventName in this.props && typeof this.props[eventName] === 'function')
-			this.props[eventName]();
+		this.componentObject = new className();
 	}
 
 
@@ -86,6 +88,7 @@ export class ComponentEditModal extends React.Component<IComponentEditModalProps
 
 		return inputs;
 	}
+
 
 	private getFormValidationSchema()
 	{
@@ -103,6 +106,22 @@ export class ComponentEditModal extends React.Component<IComponentEditModalProps
 
 		return Yup.object().shape(propsValidationRules);
 	}
+
+
+	private updateProps(props)
+	{
+		if(this.props.component === null)
+			return;
+
+		for(let name in props)
+		{
+			const value = props[name];
+
+			this.props.component.props[name] = value;
+		}
+
+		this.props.onModalSubmit(this.props.component);
+	}
 }
 
 
@@ -113,4 +132,5 @@ interface IComponentEditModalProps
 
 	// Events:
 	onModalClose?: () => void;
+	onModalSubmit: (component: IEditorComponent) => void
 }

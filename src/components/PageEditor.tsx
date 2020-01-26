@@ -138,6 +138,7 @@ export default class PageEditor extends React.Component<{},  IPageEditorState>
 			<ComponentEditModal
 				isOpened={this.state.modalOpened}
 				component={this.state.modalComponent}
+				onModalSubmit={this.updateModalComponent.bind(this)}
 				onModalClose={() => this.setState({modalOpened: false})}
 			/>
 		</div>;
@@ -190,6 +191,15 @@ export default class PageEditor extends React.Component<{},  IPageEditorState>
 		let ReactComponent = ComponentsList[name];
 
 		return <ReactComponent {...props} />;
+	}
+
+
+	private updateModalComponent(component: IEditorComponent)
+	{
+		if(this.state.modalComponent === null)
+			return;
+
+		this.state.modalComponent.props = component.props;
 	}
 
 

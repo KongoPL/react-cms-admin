@@ -2,11 +2,6 @@ import React from 'react';
 
 export class Modal extends React.Component<{isOpened: boolean}>
 {
-	constructor(props)
-	{
-		super(props);
-	}
-
 	render()
 	{
 		return <div className={`fixed top-0 left-0 w-full h-full ${this.props.isOpened ? 'block':'hidden'}`} style={{backgroundColor: 'rgba(255,255,255,0.65)'}}>
