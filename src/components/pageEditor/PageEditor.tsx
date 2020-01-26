@@ -1,139 +1,63 @@
 import React from "react";
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import {DragDropContext, Draggable, Droppable} from 'react-beautiful-dnd';
 import Api from "services/Api";
 import ComponentsList from "shared/ComponentsList";
 import Grid from "shared/Grid/Grid";
 import {ComponentEditModal} from "./ComponentEditModal";
+import {IEditorItem} from "./interfaces/IEditorItem";
+import {IEditorComponent} from "./interfaces/IEditorComponent";
+import {gridProps, ItemPosition, itemsData} from "./MockPageEditorData";
 
 import 'scss/components/PageEditor.scss';
-
 
 export default class PageEditor extends React.Component<{},  IPageEditorState>
 {
 	constructor(props) {
 		super(props);
 
-		Api.deletePageEditorItems();
+		Api.deletePageEditorItems(); // Used for development only
 
 		let items = Api.getPageEditorItems();
 
 		if(!items)
 		{
-			Api.savePageEditorItems([
-				{
-					id: '1',
-					location: ItemPosition.HEADER, 
-					index: 0,
-
-					component: {
-						name: 'ContentBox',
-						props: {
-							content: 'Header'
-						}
-					}
-				}, {
-					id: '2',
-					location: ItemPosition.LEFT,
-					index: 0,
-
-					component: {
-						name: 'ContentBox',
-						props: {
-							content: 'Page content box #1'
-						}
-					}
-				}, {
-					id: '3',
-					location: ItemPosition.LEFT,
-					index: 1,
-
-					component: {
-						name: 'ContentBox',
-						props: {
-							content: 'Page content box #2'
-						}
-					}
-				}, {
-					id: '4',
-					location: ItemPosition.LEFT,
-					index: 2,
-
-					component: {
-						name: 'ContentBox',
-						props: {
-							content: 'Page content box #3'
-						}
-					}
-				}, {
-					id: '5',
-					location: ItemPosition.RIGHT,
-					content: '',
-					index: 0,
-
-					component: {
-						name: 'ContentBox',
-						props: {
-							content: 'Right box #1'
-						}
-					}
-				}, {
-					id: '6',
-					location: ItemPosition.RIGHT,
-					index: 1,
-
-					component: {
-						name: 'ContentBox',
-						props: {
-							content: 'Right box #2'
-						}
-					}
-				}
-			]);
+			Api.savePageEditorItems(itemsData);
 
 			items = Api.getPageEditorItems();
 		}
 
-		this.state = { items, headerPostfix: '', modalComponent: null, modalOpened: false };
+		this.state = {
+			items,
+			modalComponent: null,
+			modalOpened: false
+		};
 	}
 
-	componentDidUpdate(prevProps: Readonly<{}>, prevState: Readonly<{ items: any[] }>, snapshot?: any): void {
+	componentDidUpdate(prevProps: Readonly<{}>, prevState: Readonly<IPageEditorState>, snapshot?: any): void {
 		Api.savePageEditorItems(this.state.items);
 	}
 	
 	
 	render()
 	{
-		let gridProps = {
-			gridStyle: {width: '960px', margin: '0px auto'},
-			gridSize: {width: 12, height: 2},
-			columnSizes: Array(12).fill('1fr'),
-			rowSizes: Array(2).fill('auto'),
-			areas: [
-				{x: 0, y: 0, width: 12, height: 1, name: ItemPosition.HEADER},
-				{x: 0, y: 1, width: 7, height: 1, name: ItemPosition.LEFT},
-				{x: 9, y: 1, width: 3, height: 1, name: ItemPosition.RIGHT}
-			],
-			gridChildren: {
-				[ItemPosition.HEADER]:
-					<Droppable droppableId={ItemPosition.HEADER}>
-						{this.DropArea.bind(this, this.getItemsToRender(ItemPosition.HEADER))}
-					</Droppable>,
-
-				[ItemPosition.LEFT]:
-					<Droppable droppableId={ItemPosition.LEFT}>
-						{this.DropArea.bind(this, this.getItemsToRender(ItemPosition.LEFT))}
-					</Droppable>,
-
-				[ItemPosition.RIGHT]:
-					<Droppable droppableId={ItemPosition.RIGHT}>
-						{this.DropArea.bind(this, this.getItemsToRender(ItemPosition.RIGHT))}
-					</Droppable>,
-			}
-		};
-
 		return <div className="page-editor">
 			<DragDropContext onDragEnd={this.onDragEnd.bind(this)}>
-				<Grid {...gridProps} />
+				<Grid {...gridProps} gridChildren={{
+					[ItemPosition.HEADER]:
+						<Droppable droppableId={ItemPosition.HEADER}>
+							{this.DropArea.bind(this, this.getItemsToRender(ItemPosition.HEADER))}
+						</Droppable>,
+
+					[ItemPosition.LEFT]:
+						<Droppable droppableId={ItemPosition.LEFT}>
+							{this.DropArea.bind(this, this.getItemsToRender(ItemPosition.LEFT))}
+						</Droppable>,
+
+					[ItemPosition.RIGHT]:
+						<Droppable droppableId={ItemPosition.RIGHT}>
+							{this.DropArea.bind(this, this.getItemsToRender(ItemPosition.RIGHT))}
+						</Droppable>,
+				}} />
 			</DragDropContext>
 			<ComponentEditModal
 				isOpened={this.state.modalOpened}
@@ -268,29 +192,6 @@ export default class PageEditor extends React.Component<{},  IPageEditorState>
 interface IPageEditorState
 {
 	items: IEditorItem[],
-	headerPostfix: string,
 	modalComponent: IEditorComponent | null,
 	modalOpened: boolean
-}
-
-enum ItemPosition
-{
-	HEADER = 'header',
-	LEFT = 'left',
-	RIGHT = 'right',
-}
-
-export interface IEditorItem
-{
-	id: string,
-	location: string,
-	index: number,
-
-	component: IEditorComponent
-}
-
-export interface IEditorComponent
-{
-	name: string
-	props: object
 }

@@ -1,11 +1,11 @@
 import React from 'react';
-import {Modal, ModalFooter, ModalHeader} from "./Modal";
+import {Modal, ModalFooter, ModalHeader} from "../Modal";
 import {Form, Formik} from "formik";
-import {TextInput} from "./Form";
+import {TextInput} from "../Form";
 import * as Yup from "yup";
-import {IEditorComponent} from "./PageEditor";
-import ComponentsList from "../shared/ComponentsList";
-import BaseModule from "../shared/BaseModule/BaseModule";
+import ComponentsList from "../../shared/ComponentsList";
+import BaseModule from "../../shared/BaseModule/BaseModule";
+import {IEditorComponent} from "./interfaces/IEditorComponent";
 
 export class ComponentEditModal extends React.Component<IComponentEditModalProps>
 {
