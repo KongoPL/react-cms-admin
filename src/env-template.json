@@ -1,0 +1,10 @@
+{
+	"message": "This is template which should be copied as env.json and filled with confidential data",
+	"firebase": {
+		"projectId": "project-id",
+		"apiKey": "apiKey",
+		"authDomain": "project-id.firebaseapp.com",
+		"databaseURL": "https://project-id.firebaseio.com",
+		"storageBucket": "bucket.appspot.com"
+	}
+}

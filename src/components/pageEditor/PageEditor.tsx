@@ -9,6 +9,7 @@ import {IEditorComponent} from "./interfaces/IEditorComponent";
 import {gridProps, ItemPosition, itemsData} from "./MockPageEditorData";
 
 import 'scss/components/PageEditor.scss';
+import LayoutManagementCell from "./LayoutManagementCell";
 
 export default class PageEditor extends React.Component<{},  IPageEditorState>
 {
@@ -44,19 +45,25 @@ export default class PageEditor extends React.Component<{},  IPageEditorState>
 			<DragDropContext onDragEnd={this.onDragEnd.bind(this)}>
 				<Grid {...gridProps} gridChildren={{
 					[ItemPosition.HEADER]:
-						<Droppable droppableId={ItemPosition.HEADER}>
-							{this.DropArea.bind(this, this.getItemsToRender(ItemPosition.HEADER))}
-						</Droppable>,
+						<LayoutManagementCell location={ItemPosition.HEADER}>
+							<Droppable droppableId={ItemPosition.HEADER}>
+								{this.DropArea.bind(this, this.getItemsToRender(ItemPosition.HEADER))}
+							</Droppable>
+						</LayoutManagementCell>,
 
 					[ItemPosition.LEFT]:
-						<Droppable droppableId={ItemPosition.LEFT}>
-							{this.DropArea.bind(this, this.getItemsToRender(ItemPosition.LEFT))}
-						</Droppable>,
+						<LayoutManagementCell location={ItemPosition.LEFT}>
+							<Droppable droppableId={ItemPosition.LEFT}>
+								{this.DropArea.bind(this, this.getItemsToRender(ItemPosition.LEFT))}
+							</Droppable>
+						</LayoutManagementCell>,
 
 					[ItemPosition.RIGHT]:
-						<Droppable droppableId={ItemPosition.RIGHT}>
-							{this.DropArea.bind(this, this.getItemsToRender(ItemPosition.RIGHT))}
-						</Droppable>,
+						<LayoutManagementCell location={ItemPosition.RIGHT}>
+							<Droppable droppableId={ItemPosition.RIGHT}>
+								{this.DropArea.bind(this, this.getItemsToRender(ItemPosition.RIGHT))}
+							</Droppable>
+						</LayoutManagementCell>,
 				}} />
 			</DragDropContext>
 			<ComponentEditModal

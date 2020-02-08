@@ -1,11 +1,17 @@
 import React from 'react';
 import PageEditor from "../../components/pageEditor/PageEditor";
+import FirebaseApi from "../../services/FirebaseApi";
 
 export default class Index extends React.Component<{}, any>
 {
 	state = {
 		modalOpened: true,
 	};
+
+	componentDidMount(): void
+	{
+		FirebaseApi.doStuff();
+	}
 
 	render() {
 		return (
