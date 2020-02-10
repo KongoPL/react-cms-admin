@@ -2,6 +2,10 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
+import FirebaseApi from "./services/FirebaseApi";
+import ENV from './env.json';
+
+FirebaseApi.init(ENV.firebase);
 
 ReactDOM.render(<App />, document.getElementById('root'));
 

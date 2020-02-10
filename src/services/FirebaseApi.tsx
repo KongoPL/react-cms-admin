@@ -1,24 +1,24 @@
 import 'firebase/auth';
 import 'firebase/firestore';
 import * as firebase from 'firebase/app';
-import ENV from 'env.json';
 
 export default class FirebaseApi
 {
-	static config = ENV.firebase;
+	private static auth;
+	private static firestore;
 
-	static doStuff()
+	static init(config): Promise<any>
 	{
-		firebase.initializeApp(FirebaseApi.config);
+		firebase.initializeApp(config);
 
-		const auth = firebase.auth(),
-			db = firebase.firestore();
+		FirebaseApi.auth = firebase.auth();
+		FirebaseApi.firestore = firebase.firestore();
 
-		auth.signInAnonymously().then(() => {
-			db.collection('test').doc('joey').set({
-				id: 'joey',
-				some: 'data'
-			});
-		})
+		return FirebaseApi.auth.signInAnonymously();
+	}
+
+	static getCollection(path: string)
+	{
+		return FirebaseApi.firestore.collection(path);
 	}
 }

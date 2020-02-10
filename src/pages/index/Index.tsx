@@ -8,11 +8,6 @@ export default class Index extends React.Component<{}, any>
 		modalOpened: true,
 	};
 
-	componentDidMount(): void
-	{
-		FirebaseApi.doStuff();
-	}
-
 	render() {
 		return (
 			<>
